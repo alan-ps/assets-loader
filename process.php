@@ -4,7 +4,6 @@
  * @file
  */
 
-
 require __DIR__ . '/vendor/autoload.php';
 
 use Sunra\PhpSimple\HtmlDomParser;
@@ -12,50 +11,36 @@ use Sunra\PhpSimple\HtmlDomParser;
 class AssetsLoader {
 
   /**
-   *
+   * The URL to be used for load the assets.
    */
-  protected $domain;
+  protected $url;
 
   /**
-   *
+   * The base site URL.
+   */
+  protected $base_url;
+
+  /**
+   * The remote docroot.
    */
   protected $remote_docroot;
 
   /**
-   *
+   * The local docroot.
    */
   protected $local_docroot;
 
   /**
-   *
+   * Constructor.
    */
-  protected $extensions;
-
-
-  /**
-   * Constructor
-   */
-  function __construct($domain, $remote_docroot, $local_docroot) {
-    $this->domain = $domain;
+  function __construct($url, $remote_docroot, $local_docroot) {
+    $this->url = $url;
     $this->remote_docroot = $remote_docroot;
     $this->local_docroot = $local_docroot;
 
-    //
-    $this->extensions = array('png', 'jpg', 'jpeg');
-  }
-
-  /**
-   *
-   */
-  public function assetsGetExtensions() {
-    return $this->extensions;
-  }
-
-  /**
-   *
-   */
-  public function assetsSetExtensions(array $extensions) {
-    $this->extensions = $extensions;
+    // Extract the base site URL.
+    $url_components = parse_url($this->url);
+    $this->base_url = $url_components['scheme'] . '://' . $url_components['host'];
   }
 
   /**
@@ -66,12 +51,13 @@ class AssetsLoader {
   public function assetsGetList() {
     $assets = array();
 
+
     // add a check
-    $dom = HtmlDomParser::file_get_html($this->domain, FALSE, NULL, 0);
+    $dom = HtmlDomParser::file_get_html($this->url, FALSE, NULL, 0);
 
     foreach($dom->find('img') as $element) {
-      $src = str_replace($this->domain, '', $element->src);
-      $assets[] = $this->domain . $src;
+      $src = str_replace($this->base_url, '', $element->src);
+      $assets[] = $this->base_url . $src;
     }
 
     return $assets;
@@ -89,8 +75,7 @@ class AssetsLoader {
     foreach ($assetsList as $item) {
       // add a check
       $content = file_get_contents($item);
-
-      $test = $this->local_docroot . str_replace($this->domain .'/'. $this->remote_docroot, '', $item);
+      $test = $this->local_docroot . str_replace($this->base_url .'/'. $this->remote_docroot, '', $item);
 
       // dir doesn't exist, make it
       if (!is_dir(dirname($test))) {
@@ -110,13 +95,14 @@ if ($_SERVER['argc'] <> 4) {
   return;
 }
 
-$url = trim($_SERVER["argv"][1], '/');
+$url = $_SERVER["argv"][1];
 $remote_docroot = trim($_SERVER["argv"][2], '/');
 $local_docroot = rtrim($_SERVER["argv"][3], '/');
 
+
 //
 if (!filter_var($url, FILTER_VALIDATE_URL)) {
-  echo "\033[33m [WARNING] $url is a valid URL\033[0m" . PHP_EOL;
+  echo "\033[33m [WARNING] {$url} is a valid URL\033[0m" . PHP_EOL;
 }
 
 //
@@ -125,5 +111,6 @@ if (!is_dir($local_docroot) || !is_writable($local_docroot)){
 }
 
 //
+
 $assetsLoader = new AssetsLoader($url, $remote_docroot, $local_docroot);
 $assetsLoader->process();
