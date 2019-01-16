@@ -56,6 +56,11 @@ class AssetsLoader {
     $dom = HtmlDomParser::file_get_html($this->url, FALSE, NULL, 0);
 
     foreach($dom->find('img') as $element) {
+      // @todo: remote_docroot can be /
+      if (strpos($element->src, $this->remote_docroot) === FALSE) {
+        continue;
+      }
+
       $src = str_replace($this->base_url, '', $element->src);
       $assets[] = $this->base_url . $src;
     }
