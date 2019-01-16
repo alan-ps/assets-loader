@@ -5,7 +5,6 @@ require __DIR__ . '/vendor/autoload.php';
 use AssetsLoader\AssetsLoader;
 use AssetsLoader\AssetsLoaderLogs;
 
-
 // The number of arguments should be 4 (the first one is a script filename):
 // domain, remote docroor and local docroot.
 if ($_SERVER['argc'] <> 4) {
@@ -25,8 +24,8 @@ if (!filter_var($url, FILTER_VALIDATE_URL)) {
 
 // Local docroot exist and writable?
 if (!is_dir($local_docroot) || !is_writable($local_docroot)){
-	echo AssetsLoaderLogs::error("{$local_docroot} is not exist it is not writable.");
-	return;
+  echo AssetsLoaderLogs::error("{$local_docroot} is not exist it is not writable.");
+  return;
 }
 
 // Lets download the assets!
