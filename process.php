@@ -1,37 +1,51 @@
 <?php
 
-/**
- * @file
- */
-
 require __DIR__ . '/vendor/autoload.php';
 
 use Sunra\PhpSimple\HtmlDomParser;
 
+/**
+ * A class representing the assets_loader tool.
+ */
 class AssetsLoader {
 
   /**
    * The URL to be used for load the assets.
+   *
+   * @var string
    */
   protected $url;
 
   /**
    * The base site URL.
+   *
+   * @var string
    */
   protected $base_url;
 
   /**
-   * The remote docroot.
+   * The remote assets docroot.
+   *
+   * @var string
    */
   protected $remote_docroot;
 
   /**
-   * The local docroot.
+   * The local assets docroot.
+   *
+   * @var string
    */
   protected $local_docroot;
 
   /**
-   * Constructor.
+   * Constructs a AssetsLoader object.
+   *
+   * @param string $url
+   *   The URL to be used for load the assets.
+   * @param string $remote_docroot
+   *   The remote assets docroot.
+   * @param string $local_docroot
+   *   The local assets docroot.
    */
   function __construct($url, $remote_docroot, $local_docroot) {
     $this->url = $url;
@@ -44,13 +58,13 @@ class AssetsLoader {
   }
 
   /**
+   * Returns a list of all image assets were found.
    *
    * @return array
    *   A list of assets.
    */
   public function assetsGetList() {
     $assets = array();
-
 
     // add a check
     $dom = HtmlDomParser::file_get_html($this->url, FALSE, NULL, 0);
@@ -69,7 +83,7 @@ class AssetsLoader {
   }
 
   /**
-   *
+   * Helps to download the image assets to your local directory.
    */
   public function process() {
     if (!$assetsList = $this->assetsGetList()) {
@@ -104,18 +118,16 @@ $url = $_SERVER["argv"][1];
 $remote_docroot = trim($_SERVER["argv"][2], '/');
 $local_docroot = rtrim($_SERVER["argv"][3], '/');
 
-
-//
+// URL valid?
 if (!filter_var($url, FILTER_VALIDATE_URL)) {
   echo "\033[33m [WARNING] {$url} is a valid URL\033[0m" . PHP_EOL;
 }
 
-//
+// Local docroot exist and writable?
 if (!is_dir($local_docroot) || !is_writable($local_docroot)){
   echo "\033[31m [ERROR] $local_docroot is not exist it is not writable.\033[0m" . PHP_EOL;
 }
 
-//
-
+// Lets download the assets!
 $assetsLoader = new AssetsLoader($url, $remote_docroot, $local_docroot);
 $assetsLoader->process();
